@@ -19,6 +19,12 @@ class MainActivity : AppCompatActivity() {
     private var result:Double = 0.0
     var op = 0
 
+    val OPERAND1_STATE ="operand1"
+    val OPERAND2_STATE ="operand2"
+    val RESULT_STATE = "result"
+    val SECONDARY_TEXT_STATE = "secondarySate"
+    val PRIMARY_TEXT_STATE = "primarySate"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -63,8 +69,8 @@ class MainActivity : AppCompatActivity() {
             val operator = (v as Button).text.toString()
             try {
                 operand1 = primaryTextView.text.toString().toDouble()
-                var s = secondaryTextView.text.toString()
-                secondaryTextView.text = s+" "+operand1+" "+operator
+                val s = secondaryTextView.text.toString()
+                secondaryTextView.text = ""+operand1+" "+operator
                 primaryTextView.text = ""
                 when(operator){
                     "+" -> op = 1
@@ -104,60 +110,67 @@ class MainActivity : AppCompatActivity() {
 
         decimalButton.setOnClickListener(numClickListener)
 
-        clear.setOnClickListener(object: View.OnClickListener{
-            override fun onClick(v: View?) {
-                primaryTextView.text = ""
-                secondaryTextView.text = ""
-                operand1 = 0.0
-                operand2 = 0.0
-                result = 0.0
+        clear.setOnClickListener {
+            primaryTextView.text = ""
+            secondaryTextView.text = ""
+            operand1 = 0.0
+            operand2 = 0.0
+            result = 0.0
+        }
+
+        changeSign.setOnClickListener {
+            try{
+                operand1 = primaryTextView.text.toString().toDouble()
+                result = -1*operand1
+                primaryTextView.text = result.toString()
+            } catch (e: NumberFormatException){
+                Log.d("signError",e.toString())
             }
+        }
 
-        })
-
-        changeSign.setOnClickListener(object: View.OnClickListener {
-            override fun onClick(v: View?) {
-                try{
-                    operand1 = primaryTextView.text.toString().toDouble()
-                    result = -1*operand1
-                    primaryTextView.text = result.toString()
-                }
-                catch (e: NumberFormatException){
-                    Log.d("signError",e.toString())
-                }
-            }
-
-        })
-
-        equalTo.setOnClickListener(object: View.OnClickListener{
-
-            override fun onClick(v: View?){
-                try {
-                    operand2 = primaryTextView.text.toString().toDouble()
-                    when (op) {
-                        1 -> {
-                            result = operand1 + operand2
-                        }
-                        2 -> result = operand1 - operand2
-                        3 -> result = operand1 * operand2
-                        4 -> {
-                            result = if (operand2 == 0.0) {
-                                Double.NaN
-                            } else {
-                                operand1 / operand2
-                            }
-                        }
-                        5 -> result = operand1 % operand2
+        equalTo.setOnClickListener {
+            try {
+                operand2 = primaryTextView.text.toString().toDouble()
+                when (op) {
+                    1 -> {
+                        result = operand1 + operand2
                     }
-                    secondaryTextView.text = ""
-                    primaryTextView.text = result.toString()
+                    2 -> result = operand1 - operand2
+                    3 -> result = operand1 * operand2
+                    4 -> {
+                        result = if (operand2 == 0.0) {
+                            Double.NaN
+                        } else {
+                            operand1 / operand2
+                        }
+                    }
+                    5 -> result = operand1 % operand2
                 }
-                catch (e: NumberFormatException){
-                    Log.d("equalTo",e.toString())
-                }
+                secondaryTextView.text = ""
+                primaryTextView.text = result.toString()
+            } catch (e: NumberFormatException){
+                Log.d("equalTo",e.toString())
             }
-        })
+        }
 
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putDouble(OPERAND1_STATE,operand1)
+        outState.putDouble(OPERAND2_STATE,operand2)
+        outState.putDouble(RESULT_STATE,result)
+        outState.putString(SECONDARY_TEXT_STATE,secondaryTextView.text.toString())
+        outState.putString(PRIMARY_TEXT_STATE,primaryTextView.text.toString())
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        operand1 = savedInstanceState.getDouble(OPERAND1_STATE)
+        operand2 = savedInstanceState.getDouble(OPERAND2_STATE)
+        result = savedInstanceState.getDouble(RESULT_STATE)
+        secondaryTextView.text = savedInstanceState.getString(SECONDARY_TEXT_STATE)
+        primaryTextView.text = savedInstanceState.getString(PRIMARY_TEXT_STATE)
     }
 
 }
